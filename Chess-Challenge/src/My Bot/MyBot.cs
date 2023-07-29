@@ -17,10 +17,10 @@ public class MyBot : IChessBot
         Move moveToPlay = allMoves[0];
         int bestValue = -999;
 
-        foreach(Move move in allMoves)
+        foreach (Move move in allMoves)
         {
             // Checks if the move is an en-passant, and take the bait
-            if(move.IsEnPassant) {
+            if (move.IsEnPassant) {
                 Console.WriteLine("En-passant detected");
                 moveToPlay = move;
                 break;
@@ -30,18 +30,22 @@ public class MyBot : IChessBot
             board.MakeMove(move);
             
             // Check if the move is a checkmate, and take the bait
-            if(board.IsInCheckmate()) {
+            if (board.IsInCheckmate()) {
                 Console.WriteLine("Checkmate detected");
                 moveToPlay = move;
                 break;
             }
 
             int boardValue = -EvaluateBoard();
-            Console.WriteLine($"Move: {move} | Value: {boardValue}");
             board.UndoMove(move);
+            // Console.WriteLine($"Move: {move} | Value: {boardValue}");
+            
+
+            // Check if move square is attacked
+            boardValue -= MoveIsAttacked(move) / 2; 
 
             // If the board value is better than the current best value, make it the new best value
-            if(boardValue > bestValue) {
+            if (boardValue > bestValue) {
                 bestValue = boardValue;
                 moveToPlay = move;
             }
@@ -56,6 +60,19 @@ public class MyBot : IChessBot
         //--------------------------------------------------------------------------------
         // Functions
         //--------------------------------------------------------------------------------
+
+        // Evalutes if the move square is under attack and returns piece value if it is
+        int MoveIsAttacked(Move move)
+        {  
+            if (board.SquareIsAttackedByOpponent(new Square
+            (move.TargetSquare.File, move.TargetSquare.Rank))) 
+            {
+                Console.WriteLine("Move" + move + "is attacked, Piece value: " + pieceValues[(int)move.MovePieceType]);
+                return pieceValues[(int)move.MovePieceType];
+            }
+            return 0;
+        }
+
 
         // Evaluate the board from the perspective of the bot
         int EvaluateBoard()
@@ -85,7 +102,7 @@ public class MyBot : IChessBot
                     int pieceValue = pieceValues[(int)piece.PieceType];
 
                     // If piece is not my colour, make it negative
-                    if(piece.IsWhite != board.IsWhiteToMove) {
+                    if (piece.IsWhite != board.IsWhiteToMove) {
                         pieceValue = -pieceValue;
                     }
 
