@@ -6,7 +6,7 @@ using System.Linq;
 public class MyBot : IChessBot
 {
     // 0 = None, 1 = Pawn, 2 = Knight, 3 = Bishop, 4 = Rook, 5 = Queen, 6 = King
-    int[] pieceValues = { 0, 10, 30, 30, 50, 90, 1000 };
+    int[] pieceValues = { 0, 10, 30, 30, 50, 90, 900 };
 
     public Move Think(Board board, Timer timer)
     {
@@ -14,13 +14,15 @@ public class MyBot : IChessBot
 
         // Stores the values of each move
         int[] moveValues = new int[newGameMoves.Length];
-        
+
+        // Checks what colour the bot is playing as
+        bool amIWhite = board.IsWhiteToMove;
 
         // Play a random move if nothing better is found
         Random rng = new();
         Move moveToPlay = newGameMoves[rng.Next(newGameMoves.Length)];
         
-        int bestMove = -999;
+        int bestMove = -9999;
 
         // Depth of the minimax algorithm
         int depth = 3;
@@ -31,7 +33,7 @@ public class MyBot : IChessBot
             // Make the move 
             board.MakeMove(newGameMove);
 
-            int moveValue = MiniMax(depth, newGameMove, -1000, 1000, false);
+            int moveValue = MiniMax(depth - 1, newGameMove, -10000, 10000, false);
 
             board.UndoMove(newGameMove);
 
@@ -58,15 +60,17 @@ public class MyBot : IChessBot
         //--------------------------------------------------------------------------------
         int MiniMax(int depth, Move move, int alpha, int beta, bool isMaximisingPlayer)
         {
-            if (depth == 0) {
-                return -EvaluateBoard();
+            if (depth == 0) 
+            {
+                // Negate the value if it's the opponent's turn
+                return isMaximisingPlayer ? -EvaluateBoard() : EvaluateBoard();
             }
 
             Move[] newGameMoves = board.GetLegalMoves();
 
             if (isMaximisingPlayer) 
             {
-                int bestMove = -999;
+                int bestMove = -9999;
 
                 foreach (Move newGameMove in newGameMoves)
                 {   // Make the move and evaluate it
@@ -85,7 +89,7 @@ public class MyBot : IChessBot
 
             else 
             {
-                int bestMove = 999;
+                int bestMove = 9999;
 
                 foreach (Move newGameMove in newGameMoves)
                 {   // Make the move and evaluate it
@@ -105,20 +109,6 @@ public class MyBot : IChessBot
         }
         //--------------------------------------------------------------------------------
 
-
-        // Evalutes if the move square is under attack and returns piece value if it is
-        //--------------------------------------------------------------------------------
-        int MoveIsAttacked(Move move)
-        {  
-            if (board.SquareIsAttackedByOpponent(new Square
-            (move.TargetSquare.File, move.TargetSquare.Rank))) 
-            {
-                Console.WriteLine("Move" + move + "is attacked, Piece value: " + pieceValues[(int)move.MovePieceType]);
-                return pieceValues[(int)move.MovePieceType];
-            }
-            return 0;
-        }
-        //--------------------------------------------------------------------------------
 
 
         // Evaluate the board from the perspective of the bot
@@ -156,8 +146,8 @@ public class MyBot : IChessBot
 
                     // Console.WriteLine("isWhite: "+ piece.IsWhite + " isWhiteToMove: " + board.IsWhiteToMove);
 
-                    // If piece is my colour, make it negative
-                    if (piece.IsWhite == board.IsWhiteToMove) {
+                    // If piece is opponent, make it negative
+                    if (piece.IsWhite != amIWhite) {
                         pieceValue = -pieceValue;
                         
                     }
@@ -168,6 +158,7 @@ public class MyBot : IChessBot
                     // Console.WriteLine(piece);
                 }
             }
+            // Console.WriteLine(totalEvaluation);
             return totalEvaluation;
         }
         //--------------------------------------------------------------------------------
