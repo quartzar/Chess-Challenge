@@ -21,7 +21,7 @@ public class MyBot : IChessBot
         int bestMove = -999;
 
         // Depth of the minimax algorithm
-        int depth = 1;
+        int depth = 3;
 
         foreach (Move newGameMove in newGameMoves)
         {
@@ -139,10 +139,10 @@ public class MyBot : IChessBot
                         pieceValue *= 100;
                     }
 
-                    Console.WriteLine("isWhite: "+ piece.IsWhite + " isWhiteToMove: " + board.IsWhiteToMove);
+                    // Console.WriteLine("isWhite: "+ piece.IsWhite + " isWhiteToMove: " + board.IsWhiteToMove);
 
-                    // If piece is not my colour, make it negative
-                    if (piece.IsWhite != board.IsWhiteToMove) {
+                    // If piece is my colour, make it negative
+                    if (piece.IsWhite == board.IsWhiteToMove) {
                         pieceValue = -pieceValue;
                         
                     }
