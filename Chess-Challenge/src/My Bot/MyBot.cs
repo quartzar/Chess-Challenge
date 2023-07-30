@@ -1,6 +1,7 @@
 ﻿using ChessChallenge.API;
 using System;
 using System.Numerics;
+using System.Collections.Generic;
 using System.Linq;
 
 public class MyBot : IChessBot
@@ -12,16 +13,14 @@ public class MyBot : IChessBot
     {
         Move[] newGameMoves = board.GetLegalMoves();
 
-        // Stores the values of each move
-        int[] moveValues = new int[newGameMoves.Length];
-
         // Play a random move if nothing better is found
         Random rng = new();
         Move moveToPlay = newGameMoves[rng.Next(newGameMoves.Length)];
         
         // Depth of the minimax algorithm
-        int depth = 3;
+        int depth = 4;
         int bestMove = -9999;
+
         foreach (Move newGameMove in newGameMoves)
         {   // Make the move 
             board.MakeMove(newGameMove);
@@ -36,9 +35,10 @@ public class MyBot : IChessBot
                 moveToPlay = newGameMove;
             }
         }
-        
 
-        // Return the best move
+        // Log time taken to make a move
+        Console.WriteLine($"Move time: {timer.MillisecondsElapsedThisTurn}ms");
+
         return moveToPlay;
 
 
@@ -99,8 +99,7 @@ public class MyBot : IChessBot
                     int rank = i / 8; //Rank '1' to '8'
 
                     // Get the piece on the square.
-                    Square square = new Square(file, rank);
-                    Piece piece = board.GetPiece(square);
+                    Piece piece = board.GetPiece(new Square(file, rank));
 
                     // Get the absolute piece value
                     int pieceValue = pieceValues[(int)piece.PieceType];
