@@ -15,7 +15,7 @@ namespace ChessChallenge.Example
             // Stores the values of each move
             // 0 = None, 1 = Pawn, 2 = Knight, 3 = Bishop, 4 = Rook, 5 = Queen, 6 = King
             int[] moveValues = new int[newGameMoves.Length];
-            int[] pieceValues = { 0, 100, 300, 300, 500, 900, 10000 };
+            int[] pieceValues = { 0, 10, 30, 30, 50, 90, 1000 };
 
             // Play a random move if nothing better is found
             Random rng = new();
@@ -24,7 +24,7 @@ namespace ChessChallenge.Example
             int bestMove = -999;
 
             // Depth of the minimax algorithm
-            int depth = 2;
+            int depth = 1;
 
             foreach (Move newGameMove in newGameMoves)
             {
@@ -138,9 +138,9 @@ namespace ChessChallenge.Example
                         int pieceValue = pieceValues[(int)piece.PieceType];
 
                         // Add high weighting to checkmate
-                        // if (board.IsInCheckmate()) {
-                        //     pieceValue *= 100;
-                        // }
+                        if (board.IsInCheckmate()) {
+                            pieceValue *= 100;
+                        }
 
                         // If piece is not my colour, make it negative
                         if (piece.IsWhite != board.IsWhiteToMove) {
