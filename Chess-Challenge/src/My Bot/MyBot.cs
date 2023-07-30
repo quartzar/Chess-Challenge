@@ -15,22 +15,15 @@ public class MyBot : IChessBot
         // Stores the values of each move
         int[] moveValues = new int[newGameMoves.Length];
 
-        // Checks what colour the bot is playing as
-        bool amIWhite = board.IsWhiteToMove;
-
         // Play a random move if nothing better is found
         Random rng = new();
         Move moveToPlay = newGameMoves[rng.Next(newGameMoves.Length)];
         
-        int bestMove = -9999;
-
         // Depth of the minimax algorithm
         int depth = 3;
-
+        int bestMove = -9999;
         foreach (Move newGameMove in newGameMoves)
-        {
-
-            // Make the move 
+        {   // Make the move 
             board.MakeMove(newGameMove);
 
             int moveValue = MiniMax(depth - 1, newGameMove, -10000, 10000, false);
@@ -59,50 +52,10 @@ public class MyBot : IChessBot
         int MiniMax(int depth, Move move, int alpha, int beta, bool isMaximisingPlayer)
         {
             if (depth == 0) 
-            {
-                // return -EvaluateBoard();
                 return isMaximisingPlayer ? EvaluateBoard() : -EvaluateBoard();
-            }
+            
 
             Move[] newGameMoves = board.GetLegalMoves();
-
-            // if (isMaximisingPlayer) 
-            // {
-            //     int bestMove = -9999;
-
-            //     foreach (Move newGameMove in newGameMoves)
-            //     {   // Make the move and evaluate it
-            //         board.MakeMove(newGameMove);
-            //         bestMove = Math.Max(bestMove, MiniMax(depth - 1, newGameMove, alpha, beta, !isMaximisingPlayer));
-            //         board.UndoMove(newGameMove);
-
-            //         // Alpha Beta pruning
-            //         alpha = Math.Max(alpha, bestMove);
-            //         if (beta <= alpha) {
-            //             return bestMove;
-            //         }
-            //     }
-            //     return bestMove;
-            // }
-            // else 
-            // {
-            //     int bestMove = 9999;
-
-            //     foreach (Move newGameMove in newGameMoves)
-            //     {   // Make the move and evaluate it
-            //         board.MakeMove(newGameMove);
-            //         bestMove = Math.Min(bestMove, MiniMax(depth - 1, newGameMove, alpha, beta, !isMaximisingPlayer));
-            //         board.UndoMove(newGameMove);
-
-            //         // Alpha Beta pruning
-            //         beta = Math.Min(beta, bestMove);
-            //         if (beta <= alpha) {
-            //             return bestMove;
-            //         }
-
-            //     }
-            //     return bestMove;
-            // }
 
             int bestMove = isMaximisingPlayer ? -9999 : 9999;
 
@@ -123,9 +76,7 @@ public class MyBot : IChessBot
                 else beta = Math.Min(beta, bestMove);
 
                 if (beta <= alpha) 
-                {
                     return bestMove;
-                }
             }
             return bestMove;
         }

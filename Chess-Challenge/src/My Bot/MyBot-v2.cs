@@ -108,16 +108,16 @@ public class MyBot_V2 : IChessBot
 
         // Evalutes if the move square is under attack and returns piece value if it is
         //--------------------------------------------------------------------------------
-        int MoveIsAttacked(Move move)
-        {  
-            if (board.SquareIsAttackedByOpponent(new Square
-            (move.TargetSquare.File, move.TargetSquare.Rank))) 
-            {
-                Console.WriteLine("Move" + move + "is attacked, Piece value: " + pieceValues[(int)move.MovePieceType]);
-                return pieceValues[(int)move.MovePieceType];
-            }
-            return 0;
-        }
+        // int MoveIsAttacked(Move move)
+        // {  
+        //     if (board.SquareIsAttackedByOpponent(new Square
+        //     (move.TargetSquare.File, move.TargetSquare.Rank))) 
+        //     {
+        //         Console.WriteLine("Move" + move + "is attacked, Piece value: " + pieceValues[(int)move.MovePieceType]);
+        //         return pieceValues[(int)move.MovePieceType];
+        //     }
+        //     return 0;
+        // }
         //--------------------------------------------------------------------------------
 
 
