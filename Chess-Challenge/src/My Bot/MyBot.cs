@@ -25,7 +25,7 @@ public class MyBot : IChessBot
         int bestMove = -9999;
 
         // Depth of the minimax algorithm
-        int depth = 4;
+        int depth = 3;
 
         foreach (Move newGameMove in newGameMoves)
         {
@@ -66,44 +66,72 @@ public class MyBot : IChessBot
 
             Move[] newGameMoves = board.GetLegalMoves();
 
-            if (isMaximisingPlayer) 
-            {
-                int bestMove = -9999;
+            // if (isMaximisingPlayer) 
+            // {
+            //     int bestMove = -9999;
 
-                foreach (Move newGameMove in newGameMoves)
-                {   // Make the move and evaluate it
-                    board.MakeMove(newGameMove);
-                    bestMove = Math.Max(bestMove, MiniMax(depth - 1, newGameMove, alpha, beta, !isMaximisingPlayer));
-                    board.UndoMove(newGameMove);
+            //     foreach (Move newGameMove in newGameMoves)
+            //     {   // Make the move and evaluate it
+            //         board.MakeMove(newGameMove);
+            //         bestMove = Math.Max(bestMove, MiniMax(depth - 1, newGameMove, alpha, beta, !isMaximisingPlayer));
+            //         board.UndoMove(newGameMove);
 
-                    // Alpha Beta pruning
+            //         // Alpha Beta pruning
+            //         alpha = Math.Max(alpha, bestMove);
+            //         if (beta <= alpha) {
+            //             return bestMove;
+            //         }
+            //     }
+            //     return bestMove;
+            // }
+            // else 
+            // {
+            //     int bestMove = 9999;
+
+            //     foreach (Move newGameMove in newGameMoves)
+            //     {   // Make the move and evaluate it
+            //         board.MakeMove(newGameMove);
+            //         bestMove = Math.Min(bestMove, MiniMax(depth - 1, newGameMove, alpha, beta, !isMaximisingPlayer));
+            //         board.UndoMove(newGameMove);
+
+            //         // Alpha Beta pruning
+            //         beta = Math.Min(beta, bestMove);
+            //         if (beta <= alpha) {
+            //             return bestMove;
+            //         }
+
+            //     }
+            //     return bestMove;
+            // }
+
+            int bestMove = isMaximisingPlayer ? -9999 : 9999;
+
+            foreach (Move newGameMove in newGameMoves)
+            {   // Make the move and evaluate it
+                board.MakeMove(newGameMove);
+                int moveValue = MiniMax(depth - 1, newGameMove, alpha, beta, !isMaximisingPlayer);
+                
+                bestMove = isMaximisingPlayer 
+                ? Math.Max(bestMove, moveValue) 
+                : Math.Min(bestMove, moveValue);
+
+                board.UndoMove(newGameMove);
+
+                // Alpha Beta pruning
+                if (isMaximisingPlayer) 
+                {
                     alpha = Math.Max(alpha, bestMove);
-                    if (beta <= alpha) {
-                        return bestMove;
-                    }
                 }
-                return bestMove;
-            }
-
-            else 
-            {
-                int bestMove = 9999;
-
-                foreach (Move newGameMove in newGameMoves)
-                {   // Make the move and evaluate it
-                    board.MakeMove(newGameMove);
-                    bestMove = Math.Min(bestMove, MiniMax(depth - 1, newGameMove, alpha, beta, !isMaximisingPlayer));
-                    board.UndoMove(newGameMove);
-
-                    // Alpha Beta pruning
+                else 
+                {
                     beta = Math.Min(beta, bestMove);
-                    if (beta <= alpha) {
-                        return bestMove;
-                    }
-
                 }
-                return bestMove;
+                if (beta <= alpha) 
+                {
+                    return bestMove;
+                }
             }
+            return bestMove;
         }
         //--------------------------------------------------------------------------------
 
@@ -123,15 +151,8 @@ public class MyBot : IChessBot
                     int file = i % 8; //File 'a' to 'h'
                     int rank = i / 8; //Rank '1' to '8'
 
-                    // Convert file and rank to algebraic notation.
-                    // char fileChar = (char)(file + 'a');
-                    // int rankInt = rank + 1;
-                    // Console.WriteLine($"{fileChar}{rankInt}");
-
-                    // Create new Square object.
-                    Square square = new Square(file, rank);
-
                     // Get the piece on the square.
+                    Square square = new Square(file, rank);
                     Piece piece = board.GetPiece(square);
 
                     // Get the absolute piece value
@@ -142,21 +163,14 @@ public class MyBot : IChessBot
                         pieceValue *= 100;
                     }
 
-                    // Console.WriteLine("isWhite: "+ piece.IsWhite + " isWhiteToMove: " + board.IsWhiteToMove);
-
                     // If piece is opponent, make it negative
                     if (piece.IsWhite != board.IsWhiteToMove) {
                         pieceValue = -pieceValue;
                         
                     }
-
-                    // Add the piece value to the total evaluation
                     totalEvaluation += pieceValue;
-
-                    // Console.WriteLine(piece);
                 }
             }
-            // Console.WriteLine(totalEvaluation);
             return totalEvaluation;
         }
         //--------------------------------------------------------------------------------
