@@ -7,50 +7,40 @@ public class MyBot : IChessBot
 {
     public Move Think(Board board, Timer timer)
     {
-        Move[] allMoves = board.GetLegalMoves();
+        Move[] newGameMoves = board.GetLegalMoves();
 
         // Stores the values of each move
         // 0 = None, 1 = Pawn, 2 = Knight, 3 = Bishop, 4 = Rook, 5 = Queen, 6 = King
-        int[] moveValues = new int[allMoves.Length];
+        int[] moveValues = new int[newGameMoves.Length];
         int[] pieceValues = { 0, 100, 300, 300, 500, 900, 10000 };
 
-        Move moveToPlay = allMoves[0];
-        int bestValue = -999;
+        // Play a random move if nothing better is found
+        Random rng = new();
+        Move moveToPlay = newGameMoves[rng.Next(newGameMoves.Length)];
+        
+        int bestMove = -999;
 
-        foreach (Move move in allMoves)
+        // Depth of the minimax algorithm
+        int depth = 1;
+
+        foreach (Move newGameMove in newGameMoves)
         {
-            // Checks if the move is an en-passant, and take the bait
-            if (move.IsEnPassant) {
-                Console.WriteLine("En-passant detected");
-                moveToPlay = move;
-                break;
-            }
 
-            // Make the move and evaluate the board, then undo the move
-            board.MakeMove(move);
-            
-            // Check if the move is a checkmate, and take the bait
-            if (board.IsInCheckmate()) {
-                Console.WriteLine("Checkmate detected");
-                moveToPlay = move;
-                break;
-            }
+            // Make the move 
+            board.MakeMove(newGameMove);
 
-            int boardValue = -EvaluateBoard();
-            board.UndoMove(move);
-            // Console.WriteLine($"Move: {move} | Value: {boardValue}");
-            
+            int moveValue = MiniMax(depth, newGameMove, false);
 
-            // Check if move square is attacked
-            boardValue -= MoveIsAttacked(move) / 2; 
+            board.UndoMove(newGameMove);
 
-            // If the board value is better than the current best value, make it the new best value
-            if (boardValue > bestValue) {
-                bestValue = boardValue;
-                moveToPlay = move;
+
+
+            // Evaluate best move 
+            if (moveValue >= bestMove) {
+                bestMove = moveValue;
+                moveToPlay = newGameMove;
             }
         }
-
         
 
         // Return the best move
@@ -61,7 +51,48 @@ public class MyBot : IChessBot
         // Functions
         //--------------------------------------------------------------------------------
 
+
+        // MiniMax algorithm
+        //--------------------------------------------------------------------------------
+        int MiniMax(int depth, Move move, bool isMaximisingPlayer)
+        {
+            if (depth == 0) {
+                return -EvaluateBoard();
+            }
+
+            Move[] newGameMoves = board.GetLegalMoves();
+
+            if (isMaximisingPlayer) 
+            {
+                int bestMove = -999;
+
+                foreach (Move newGameMove in newGameMoves)
+                {
+                    board.MakeMove(newGameMove);
+                    bestMove = Math.Max(bestMove, MiniMax(depth - 1, newGameMove, !isMaximisingPlayer));
+                    board.UndoMove(newGameMove);
+                }
+                return bestMove;
+            }
+
+            else 
+            {
+                int bestMove = 999;
+
+                foreach (Move newGameMove in newGameMoves)
+                {
+                    board.MakeMove(newGameMove);
+                    bestMove = Math.Min(bestMove, MiniMax(depth - 1, newGameMove, !isMaximisingPlayer));
+                    board.UndoMove(newGameMove);
+                }
+                return bestMove;
+            }
+        }
+        //--------------------------------------------------------------------------------
+
+
         // Evalutes if the move square is under attack and returns piece value if it is
+        //--------------------------------------------------------------------------------
         int MoveIsAttacked(Move move)
         {  
             if (board.SquareIsAttackedByOpponent(new Square
@@ -72,9 +103,11 @@ public class MyBot : IChessBot
             }
             return 0;
         }
+        //--------------------------------------------------------------------------------
 
 
         // Evaluate the board from the perspective of the bot
+        //--------------------------------------------------------------------------------
         int EvaluateBoard()
         {
             ulong bitboard = board.AllPiecesBitboard; 
@@ -101,9 +134,17 @@ public class MyBot : IChessBot
                     // Get the absolute piece value
                     int pieceValue = pieceValues[(int)piece.PieceType];
 
+                    // Add high weighting to checkmate
+                    if (board.IsInCheckmate()) {
+                        pieceValue *= 100;
+                    }
+
+                    Console.WriteLine("isWhite: "+ piece.IsWhite + " isWhiteToMove: " + board.IsWhiteToMove);
+
                     // If piece is not my colour, make it negative
                     if (piece.IsWhite != board.IsWhiteToMove) {
                         pieceValue = -pieceValue;
+                        
                     }
 
                     // Add the piece value to the total evaluation
@@ -114,6 +155,7 @@ public class MyBot : IChessBot
             }
             return totalEvaluation;
         }
+        //--------------------------------------------------------------------------------
     }
 }
 
