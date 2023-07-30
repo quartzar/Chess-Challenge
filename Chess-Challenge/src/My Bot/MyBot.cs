@@ -25,7 +25,7 @@ public class MyBot : IChessBot
         int bestMove = -9999;
 
         // Depth of the minimax algorithm
-        int depth = 3;
+        int depth = 4;
 
         foreach (Move newGameMove in newGameMoves)
         {
@@ -36,8 +36,6 @@ public class MyBot : IChessBot
             int moveValue = MiniMax(depth - 1, newGameMove, -10000, 10000, false);
 
             board.UndoMove(newGameMove);
-
-
 
             // Evaluate best move 
             if (moveValue >= bestMove) {
@@ -62,8 +60,8 @@ public class MyBot : IChessBot
         {
             if (depth == 0) 
             {
-                // Negate the value if it's the opponent's turn
-                return isMaximisingPlayer ? -EvaluateBoard() : EvaluateBoard();
+                // return -EvaluateBoard();
+                return isMaximisingPlayer ? EvaluateBoard() : -EvaluateBoard();
             }
 
             Move[] newGameMoves = board.GetLegalMoves();
@@ -147,7 +145,7 @@ public class MyBot : IChessBot
                     // Console.WriteLine("isWhite: "+ piece.IsWhite + " isWhiteToMove: " + board.IsWhiteToMove);
 
                     // If piece is opponent, make it negative
-                    if (piece.IsWhite != amIWhite) {
+                    if (piece.IsWhite != board.IsWhiteToMove) {
                         pieceValue = -pieceValue;
                         
                     }
@@ -164,7 +162,3 @@ public class MyBot : IChessBot
         //--------------------------------------------------------------------------------
     }
 }
-
-
-/////////////////////////
-// Old code snippets

@@ -28,7 +28,7 @@ namespace ChessChallenge.Example
             int bestMove = -9999;
 
             // Depth of the minimax algorithm
-            int depth = 3;
+            int depth = 2;
 
             foreach (Move newGameMove in newGameMoves)
             {
@@ -65,8 +65,8 @@ namespace ChessChallenge.Example
             {
                 if (depth == 0) 
                 {
-                    // Negate the value if it's the opponent's turn
-                    return isMaximisingPlayer ? -EvaluateBoard() : EvaluateBoard();
+                    // return -EvaluateBoard();
+                    return isMaximisingPlayer ? EvaluateBoard() : -EvaluateBoard();
                 }
 
                 Move[] newGameMoves = board.GetLegalMoves();
@@ -150,7 +150,7 @@ namespace ChessChallenge.Example
                         // Console.WriteLine("isWhite: "+ piece.IsWhite + " isWhiteToMove: " + board.IsWhiteToMove);
 
                         // If piece is opponent, make it negative
-                        if (piece.IsWhite != amIWhite) {
+                        if (piece.IsWhite != board.IsWhiteToMove) {
                             pieceValue = -pieceValue;
                             
                         }
