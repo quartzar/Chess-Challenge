@@ -18,8 +18,10 @@ public class MyBot : IChessBot
         Move moveToPlay = newGameMoves[rng.Next(newGameMoves.Length)];
         
         // Depth of the minimax algorithm
-        int depth = 4;
+        int depth = 5;
         int bestMove = -9999;
+
+        int monkeyCounter = 0;
 
         foreach (Move newGameMove in newGameMoves)
         {   // Make the move 
@@ -38,6 +40,8 @@ public class MyBot : IChessBot
 
         // Log time taken to make a move
         Console.WriteLine($"Move time: {timer.MillisecondsElapsedThisTurn}ms");
+        // Log monkey counter
+        Console.WriteLine($"Monkey counter: {monkeyCounter}");
 
         return moveToPlay;
 
@@ -63,7 +67,9 @@ public class MyBot : IChessBot
             {   // Make the move and evaluate it
                 board.MakeMove(newGameMove);
                 int moveValue = MiniMax(depth - 1, newGameMove, alpha, beta, !isMaximisingPlayer);
-                
+
+                monkeyCounter++;                
+
                 bestMove = isMaximisingPlayer 
                 ? Math.Max(bestMove, moveValue) 
                 : Math.Min(bestMove, moveValue);
