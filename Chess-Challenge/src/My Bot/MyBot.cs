@@ -119,13 +119,9 @@ public class MyBot : IChessBot
 
                 // Alpha Beta pruning
                 if (isMaximisingPlayer) 
-                {
                     alpha = Math.Max(alpha, bestMove);
-                }
-                else 
-                {
-                    beta = Math.Min(beta, bestMove);
-                }
+                else beta = Math.Min(beta, bestMove);
+
                 if (beta <= alpha) 
                 {
                     return bestMove;
