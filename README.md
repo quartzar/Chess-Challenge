@@ -5,18 +5,18 @@ Welcome to the quartz-bot repository for Sebastian Lague's [Chess Bot Challenge]
 ### Search
 - [x] [Minimax](https://www.chessprogramming.org/Minimax) algorithm
 - [x] [Alpha-Beta Pruning](https://www.chessprogramming.org/Alpha-Beta) for optimisation of Minimax
-- [] [Iterative Deepening](https://www.chessprogramming.org/Iterative_Deepening) 
-- [] [Transposition Tables](https://www.chessprogramming.org/Transposition_Table)
-  - [] [Zobrist Hashing](https://www.chessprogramming.org/Zobrist_Hashing)
-  - [] [Move Ordering](https://www.chessprogramming.org/Move_Ordering)
-- [] [Quiescence Search](https://www.chessprogramming.org/Quiescence_Search)
+- [ ] [Iterative Deepening](https://www.chessprogramming.org/Iterative_Deepening) 
+- [ ] [Transposition Tables](https://www.chessprogramming.org/Transposition_Table)
+  - [ ] [Zobrist Hashing](https://www.chessprogramming.org/Zobrist_Hashing)
+  - [ ] [Move Ordering](https://www.chessprogramming.org/Move_Ordering)
+- [ ] [Quiescence Search](https://www.chessprogramming.org/Quiescence_Search)
 
 
 ### Evaluation
 - [x] Linear [Material](https://www.chessprogramming.org/Material) scoring
   - [x] [Piece-Square Tables](https://www.chessprogramming.org/Piece-Square_Tables)
   - [x] [Mobility](https://www.chessprogramming.org/Mobility)
-  - [] [Pawn Structure](https://www.chessprogramming.org/Pawn_Structure)
-  - [] [King Safety](https://www.chessprogramming.org/King_Safety)
+  - [ ] [Pawn Structure](https://www.chessprogramming.org/Pawn_Structure)
+  - [ ] [King Safety](https://www.chessprogramming.org/King_Safety)
 
 
