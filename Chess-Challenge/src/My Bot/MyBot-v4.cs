@@ -18,10 +18,10 @@ public class MyBot_V4 : IChessBot
         Move moveToPlay = newGameMoves[rng.Next(newGameMoves.Length)];
         
         // Depth of the minimax algorithm
-        int depth = 2;
+        int depth = 3;
         int bestMove = -9999;
 
-        int monkeyCounter = 0;
+        // int monkeyCounter = 0;
 
         foreach (Move newGameMove in newGameMoves)
         {   // Make the move 
@@ -67,7 +67,7 @@ public class MyBot_V4 : IChessBot
                 board.MakeMove(newGameMove);
                 int moveValue = MiniMax(depth - 1, newGameMove, alpha, beta, !isMaximisingPlayer);
 
-                monkeyCounter++;                
+                // monkeyCounter++;                
 
                 bestMove = isMaximisingPlayer 
                 ? Math.Max(bestMove, moveValue) 
