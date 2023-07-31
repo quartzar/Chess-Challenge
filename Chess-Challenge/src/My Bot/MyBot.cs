@@ -18,7 +18,7 @@ public class MyBot : IChessBot
         Move moveToPlay = newGameMoves[rng.Next(newGameMoves.Length)];
         
         // Depth of the minimax algorithm
-        int depth = 5;
+        int depth = 3;
         int bestMove = -9999;
 
         int monkeyCounter = 0;
@@ -39,9 +39,8 @@ public class MyBot : IChessBot
         }
 
         // Log time taken to make a move
-        Console.WriteLine($"Move time: {timer.MillisecondsElapsedThisTurn}ms");
-        // Log monkey counter
-        Console.WriteLine($"Monkey counter: {monkeyCounter}");
+        // Console.WriteLine($"Move time: {timer.MillisecondsElapsedThisTurn}ms");
+        // Console.WriteLine($"Monkey counter: {monkeyCounter}");
 
         return moveToPlay;
 
@@ -112,7 +111,7 @@ public class MyBot : IChessBot
 
                     // Add high weighting to checkmate
                     if (board.IsInCheckmate()) {
-                        pieceValue *= 100;
+                        pieceValue *= 10;
                     }
 
                     // If piece is opponent, make it negative
@@ -123,6 +122,16 @@ public class MyBot : IChessBot
                     totalEvaluation += pieceValue;
                 }
             }
+            // Calculate mobility
+            int myMobility = board.GetLegalMoves().Length;
+            if (board.TrySkipTurn()) {
+                int opponentMobility = board.GetLegalMoves().Length;
+                board.UndoSkipTurn();
+                int mobility = myMobility - opponentMobility;
+                Console.WriteLine($"Mobility: {mobility}");
+                totalEvaluation += (int)(1 * mobility);
+            }
+
             return totalEvaluation;
         }
         //--------------------------------------------------------------------------------
