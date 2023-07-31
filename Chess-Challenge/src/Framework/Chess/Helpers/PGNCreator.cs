@@ -17,6 +17,8 @@ namespace ChessChallenge.Chess
             return CreatePGN(board.AllGameMoves.ToArray(), result, board.GameStartFen, whiteName, blackName);
         }
 
+        private static int numGames = 0;
+
         public static string CreatePGN(Move[] moves, GameResult result, string startFen, string whiteName = "", string blackName = "")
         {
             startFen = startFen.Replace("\n", "").Replace("\r", "");
@@ -24,6 +26,8 @@ namespace ChessChallenge.Chess
             StringBuilder pgn = new();
             Board board = new Board();
             board.LoadPosition(startFen);
+            numGames++;
+            pgn.AppendLine($"[Game #" + numGames + "]");
             // Headers
             if (!string.IsNullOrEmpty(whiteName))
             {
