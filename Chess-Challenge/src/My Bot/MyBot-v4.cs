@@ -4,7 +4,7 @@ using System.Numerics;
 using System.Collections.Generic;
 using System.Linq;
 
-public class MyBot : IChessBot
+public class MyBot_V4 : IChessBot
 {
     // 0 = None, 1 = Pawn, 2 = Knight, 3 = Bishop, 4 = Rook, 5 = Queen, 6 = King
     int[] pieceValues = { 0, 10, 30, 30, 50, 90, 900 };
@@ -54,19 +54,11 @@ public class MyBot : IChessBot
         //--------------------------------------------------------------------------------
         int MiniMax(int depth, Move move, int alpha, int beta, bool isMaximisingPlayer)
         {
+            if (depth == 0) 
+                return isMaximisingPlayer ? EvaluateBoard() : -EvaluateBoard();
+            
+
             Move[] newGameMoves = board.GetLegalMoves();
-
-            // Do not evaluate if move leads to draw or checkmate
-            if (board.IsDraw()) return 0; // ~35+/- 50 Elo increase
-            if (newGameMoves.Length == 0) // Checkmate
-            {
-                return isMaximisingPlayer 
-                ? -99999 - board.PlyCount 
-                :  99999 + board.PlyCount;
-            }
-                
-
-            if (depth == 0) return isMaximisingPlayer ? EvaluateBoard() : -EvaluateBoard();
 
             int bestMove = isMaximisingPlayer ? -9999 : 9999;
 
@@ -118,9 +110,9 @@ public class MyBot : IChessBot
                     int pieceValue = pieceValues[(int)piece.PieceType];
 
                     // Add high weighting to checkmate
-                    // if (board.IsInCheckmate()) {
-                    //     pieceValue *= 10;
-                    // }
+                    if (board.IsInCheckmate()) {
+                        pieceValue *= 10;
+                    }
 
                     // If piece is opponent, make it negative
                     if (piece.IsWhite != board.IsWhiteToMove) {
@@ -131,16 +123,18 @@ public class MyBot : IChessBot
                 }
             }
 
-            // Penalty for causing a draw --> Unknown if this is beneficial or not
-            // totalEvaluation -= board.IsDraw() ? 10 : 0;
-
-            // Calculate mobility --> ELO diff increase of 100-130
+            // Calculate mobility and whether the game is a draw
             int myMobility = board.GetLegalMoves().Length;
             if (board.TrySkipTurn()) {
                 int opponentMobility = board.GetLegalMoves().Length;
                 int mobility = myMobility - opponentMobility;
                 
                 totalEvaluation += mobility;
+
+                totalEvaluation -= board.IsDraw()
+                ? 500
+                : 0;
+
                 board.UndoSkipTurn();
             }
 
