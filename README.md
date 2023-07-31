@@ -15,7 +15,7 @@ Welcome to the quartz-bot repository for Sebastian Lague's [Chess Bot Challenge]
 ### Evaluation
 - [x] Linear [Material](https://www.chessprogramming.org/Material) scoring
   - [x] [Mobility](https://www.chessprogramming.org/Mobility)
-  - [x] [Piece-Square Tables](https://www.chessprogramming.org/Piece-Square_Tables)
+  - [ ] [Piece-Square Tables](https://www.chessprogramming.org/Piece-Square_Tables)
   - [ ] [Pawn Structure](https://www.chessprogramming.org/Pawn_Structure)
   - [ ] [King Safety](https://www.chessprogramming.org/King_Safety)
 
