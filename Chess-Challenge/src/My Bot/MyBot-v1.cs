@@ -12,7 +12,7 @@ public class MyBot_V1 : IChessBot
         // Stores the values of each move
         // 0 = None, 1 = Pawn, 2 = Knight, 3 = Bishop, 4 = Rook, 5 = Queen, 6 = King
         int[] moveValues = new int[allMoves.Length];
-        int[] pieceValues = { 0, 10, 30, 30, 50, 90, 1000 };
+        int[] pieceValues = { 0, 10, 30, 30, 50, 90, 1000 }; // Monkeys?
 
         // Play a random move if nothing better is found
         Random rng = new();
