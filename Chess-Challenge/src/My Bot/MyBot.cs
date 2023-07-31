@@ -18,7 +18,7 @@ public class MyBot : IChessBot
         Move moveToPlay = newGameMoves[rng.Next(newGameMoves.Length)];
         
         // Depth of the minimax algorithm
-        int depth = 3;
+        int depth = 2;
         int bestMove = -9999;
 
         int monkeyCounter = 0;
@@ -54,11 +54,19 @@ public class MyBot : IChessBot
         //--------------------------------------------------------------------------------
         int MiniMax(int depth, Move move, int alpha, int beta, bool isMaximisingPlayer)
         {
-            if (depth == 0) 
-                return isMaximisingPlayer ? EvaluateBoard() : -EvaluateBoard();
-            
-
             Move[] newGameMoves = board.GetLegalMoves();
+
+            // Do not evaluate if move leads to draw or checkmate
+            if (board.IsDraw()) return 0; // ~35+/- 50 Elo increase
+            if (newGameMoves.Length == 0) // Checkmate
+            {
+                return isMaximisingPlayer 
+                ? -99999 - board.PlyCount 
+                :  99999 + board.PlyCount;
+            }
+                
+
+            if (depth == 0) return isMaximisingPlayer ? EvaluateBoard() : -EvaluateBoard();
 
             int bestMove = isMaximisingPlayer ? -9999 : 9999;
 
@@ -110,9 +118,9 @@ public class MyBot : IChessBot
                     int pieceValue = pieceValues[(int)piece.PieceType];
 
                     // Add high weighting to checkmate
-                    if (board.IsInCheckmate()) {
-                        pieceValue *= 10;
-                    }
+                    // if (board.IsInCheckmate()) {
+                    //     pieceValue *= 10;
+                    // }
 
                     // If piece is opponent, make it negative
                     if (piece.IsWhite != board.IsWhiteToMove) {
@@ -122,14 +130,18 @@ public class MyBot : IChessBot
                     totalEvaluation += pieceValue;
                 }
             }
-            // Calculate mobility
+
+            // Penalty for causing a draw --> Unknown if this is beneficial or not
+            // totalEvaluation -= board.IsDraw() ? 10 : 0;
+
+            // Calculate mobility --> ELO diff increase of 100-130
             int myMobility = board.GetLegalMoves().Length;
             if (board.TrySkipTurn()) {
                 int opponentMobility = board.GetLegalMoves().Length;
-                board.UndoSkipTurn();
                 int mobility = myMobility - opponentMobility;
-                Console.WriteLine($"Mobility: {mobility}");
-                totalEvaluation += (int)(1 * mobility);
+                
+                totalEvaluation += mobility;
+                board.UndoSkipTurn();
             }
 
             return totalEvaluation;
