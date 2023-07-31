@@ -18,10 +18,11 @@ public class MyBot : IChessBot
         Move moveToPlay = newGameMoves[rng.Next(newGameMoves.Length)];
         
         // Depth of the minimax algorithm
-        int depth = 2;
+        int depth = 3;
         int bestMove = -9999;
 
-        int monkeyCounter = 0;
+        int monkeyCounter = 0; //#DEBUG
+        int startTime = timer.MillisecondsElapsedThisTurn; //#DEBUG
 
         foreach (Move newGameMove in newGameMoves)
         {   // Make the move 
@@ -42,6 +43,15 @@ public class MyBot : IChessBot
         // Console.WriteLine($"Move time: {timer.MillisecondsElapsedThisTurn}ms");
         // Console.WriteLine($"Monkey counter: {monkeyCounter}");
 
+        // Log positions per second
+        int endTime = timer.MillisecondsElapsedThisTurn; //#DEBUG
+        int moveTime = endTime - startTime; //#DEBUG
+        int positionsPerSecond 
+        = monkeyCounter > 0 & moveTime > 0 ? (int)(monkeyCounter * 1000 / moveTime) : 0; //#DEBUG
+        string formattedPositionsPerSecond = string.Format("{0:n0}", positionsPerSecond); //#DEBUG
+        Console.WriteLine($"Positions/s => {formattedPositionsPerSecond}"); //#DEBUG
+
+
         return moveToPlay;
 
 
@@ -57,7 +67,7 @@ public class MyBot : IChessBot
             Move[] newGameMoves = board.GetLegalMoves();
 
             // Do not evaluate if move leads to draw or checkmate
-            if (board.IsDraw()) return 0; // ~35+/- 50 Elo increase
+            if (board.IsDraw()) return 0; // ~75+/-20 Elo increase
             if (newGameMoves.Length == 0) // Checkmate
             {
                 return isMaximisingPlayer 
@@ -66,16 +76,15 @@ public class MyBot : IChessBot
             }
                 
 
-            if (depth == 0) return isMaximisingPlayer ? EvaluateBoard() : -EvaluateBoard();
+            if (depth == 0) 
+                return isMaximisingPlayer ? EvaluateBoard() : -EvaluateBoard();
 
             int bestMove = isMaximisingPlayer ? -9999 : 9999;
 
             foreach (Move newGameMove in newGameMoves)
             {   // Make the move and evaluate it
                 board.MakeMove(newGameMove);
-                int moveValue = MiniMax(depth - 1, newGameMove, alpha, beta, !isMaximisingPlayer);
-
-                monkeyCounter++;                
+                int moveValue = MiniMax(depth - 1, newGameMove, alpha, beta, !isMaximisingPlayer);  
 
                 bestMove = isMaximisingPlayer 
                 ? Math.Max(bestMove, moveValue) 
@@ -100,7 +109,9 @@ public class MyBot : IChessBot
         // Evaluate the board from the perspective of the bot
         //--------------------------------------------------------------------------------
         int EvaluateBoard()
-        {
+        {   
+            monkeyCounter++; //#DEBUG
+
             ulong bitboard = board.AllPiecesBitboard; 
             int totalEvaluation = 0;
             
