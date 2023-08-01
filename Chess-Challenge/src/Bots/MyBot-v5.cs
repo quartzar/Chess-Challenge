@@ -21,7 +21,7 @@ public class MyBot_V5 : IChessBot
         int depth = 3;
         int bestMove = -9999;
 
-        // int monkeyCounter = 0; //#DEBUG
+        int monkeyCounter = 0; //#DEBUG
         // int startTime = timer.MillisecondsElapsedThisTurn; //#DEBUG
 
         foreach (Move newGameMove in newGameMoves)
@@ -67,30 +67,48 @@ public class MyBot_V5 : IChessBot
             Move[] newGameMoves = board.GetLegalMoves();
 
             // Do not evaluate if move leads to draw or checkmate
-            if (board.IsDraw()) return 0; // ~75+/-20 Elo increase
+            if (board.IsDraw()) return 0; // ~75+/-20 Elo increase over V4
             if (newGameMoves.Length == 0) // Checkmate
             {
                 return isMaximisingPlayer 
-                ? -99999 - board.PlyCount 
-                :  99999 + board.PlyCount;
+                ? -99999 + board.PlyCount 
+                :  99999 - board.PlyCount;
             }
                 
 
             if (depth == 0) 
                 return isMaximisingPlayer ? EvaluateBoard() : -EvaluateBoard();
 
-            int bestMove = isMaximisingPlayer ? -9999 : 9999;
+            // Order the moves for efficiency TODO: Improve ordering, reduce token count
+            List<Move> captureMoves = new List<Move>();
+            List<Move> promotionMoves = new List<Move>();
+            List<Move> otherMoves = new List<Move>();
 
-            foreach (Move newGameMove in newGameMoves)
+            foreach (Move m in newGameMoves)
+            {
+                if (m.IsCapture) { 
+                    captureMoves.Add(m);
+                }
+                else if (m.IsPromotion) {
+                    promotionMoves.Add(m);
+                }
+                else otherMoves.Add(m);
+            }
+        
+            Move[] orderedMoves = captureMoves.Concat(promotionMoves).Concat(otherMoves).ToArray();
+
+            int bestMove = isMaximisingPlayer ? -9999 : 9999;          
+
+            foreach (Move orderedMove in orderedMoves)
             {   // Make the move and evaluate it
-                board.MakeMove(newGameMove);
-                int moveValue = MiniMax(depth - 1, newGameMove, alpha, beta, !isMaximisingPlayer);  
+                board.MakeMove(orderedMove);
+                int moveValue = MiniMax(depth - 1, orderedMove, alpha, beta, !isMaximisingPlayer);  
 
                 bestMove = isMaximisingPlayer 
                 ? Math.Max(bestMove, moveValue) 
                 : Math.Min(bestMove, moveValue);
 
-                board.UndoMove(newGameMove);
+                board.UndoMove(orderedMove);
 
                 // Alpha Beta pruning
                 if (isMaximisingPlayer) 
@@ -110,7 +128,7 @@ public class MyBot_V5 : IChessBot
         //--------------------------------------------------------------------------------
         int EvaluateBoard()
         {   
-            // monkeyCounter++; //#DEBUG
+            monkeyCounter++; //#DEBUG
 
             ulong bitboard = board.AllPiecesBitboard; 
             int totalEvaluation = 0;
