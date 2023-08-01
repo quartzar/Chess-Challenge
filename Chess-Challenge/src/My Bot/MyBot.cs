@@ -9,17 +9,47 @@ public class MyBot : IChessBot
     // 0 = None, 1 = Pawn, 2 = Knight, 3 = Bishop, 4 = Rook, 5 = Queen, 6 = King
     int[] pieceValues = { 0, 10, 30, 30, 50, 90, 900 };
 
+    //--------------------------------------------------------------------------------
+    // Transposition table                                            CREDIT: Selenaut
+    
+    // private const byte INVALID = 0, EXACT = 1, LOWERBOUND = 2, UPPERBOUND = 3;
+
+    // 14 bytes per entry, likely will align to 16 bytes due to padding (if it aligns to 32, recalculate max TP table size)
+    struct Transposition
+    {
+        public ulong zobristHash;
+        public Move move;
+        public int evaluation;
+        public sbyte depth;
+        public byte flag;
+    }; 
+
+    Transposition[] m_TPTable;
+    // ulong k_TpMask = 0x7FFFFF; //4.7 million entries, likely consuming about 151 MB of memory
+    //To access => ref Transposition transposition = ref m_TPTable[board.ZobristKey & k_TpMask];
+    //you also need to check to make sure that the stored hash is equal to the board state you're interested in, alongside your normal checks w.r.t. depth etc.
+
+    public MyBot()
+    {
+        m_TPTable = new Transposition[0x800000];
+    }
+
+    Board m_board;
+
+    //--------------------------------------------------------------------------------
+
     public Move Think(Board board, Timer timer)
     {
         Move[] newGameMoves = board.GetLegalMoves();
-
+        m_board = board;
+        
         // Play a random move if nothing better is found
         Random rng = new();
         Move moveToPlay = newGameMoves[rng.Next(newGameMoves.Length)];
         
         // Depth of the minimax algorithm
         int depth = 3;
-        int bestMove = -9999;
+        int bestEvaluation = -9999;
 
         int monkeyCounter = 0; //#DEBUG
         int startTime = timer.MillisecondsElapsedThisTurn; //#DEBUG
@@ -33,8 +63,8 @@ public class MyBot : IChessBot
             board.UndoMove(newGameMove);
 
             // Evaluate best move 
-            if (moveValue >= bestMove) {
-                bestMove = moveValue;
+            if (moveValue >= bestEvaluation) {
+                bestEvaluation = moveValue;
                 moveToPlay = newGameMove;
             }
         }
@@ -44,8 +74,7 @@ public class MyBot : IChessBot
         // Console.WriteLine($"Monkey counter: {monkeyCounter}");
 
         // Log positions per second
-        int endTime = timer.MillisecondsElapsedThisTurn; //#DEBUG
-        int moveTime = endTime - startTime; //#DEBUG
+        int moveTime = timer.MillisecondsElapsedThisTurn - startTime; //#DEBUG
         int positionsPerSecond 
         = monkeyCounter > 0 & moveTime > 0 ? (int)(monkeyCounter * 1000 / moveTime) : 0; //#DEBUG
         string formattedPositionsPerSecond = string.Format("{0:n0}", positionsPerSecond); //#DEBUG
@@ -63,10 +92,30 @@ public class MyBot : IChessBot
         //--------------------------------------------------------------------------------
         int MiniMax(int depth, Move move, int alpha, int beta, bool isMaximisingPlayer)
         {
+            // Transposition table lookup
+            ref Transposition tp = ref m_TPTable[m_board.ZobristKey & 0x7FFFFF];
+            if (tp.zobristHash == m_board.ZobristKey && tp.depth >= depth)
+            {
+                Console.WriteLine("TP hit");
+                switch (tp.flag)
+                {
+                    case 1: // EXACT
+                        return tp.evaluation;
+                    case 2: // LOWERBOUND
+                        alpha = Math.Max(alpha, tp.evaluation);
+                        break;
+                    case 3: // UPPERBOUND
+                        beta = Math.Min(beta, tp.evaluation);
+                        break;
+                }
+                if (alpha >= beta) 
+                    return tp.evaluation;
+            }
+
             Move[] newGameMoves = board.GetLegalMoves();
 
             // Do not evaluate if move leads to draw or checkmate
-            if (board.IsDraw()) return 0; // ~75+/-20 Elo increase
+            if (board.IsDraw()) return 0; // ~75+/-20 Elo increase over V4
             if (newGameMoves.Length == 0) // Checkmate
             {
                 return isMaximisingPlayer 
@@ -80,47 +129,44 @@ public class MyBot : IChessBot
 
 
             // Order the moves for efficiency TODO: Improve ordering, reduce token count
-            List<Move> captureMoves = new List<Move>();
-            List<Move> promotionMoves = new List<Move>();
-            List<Move> otherMoves = new List<Move>();
+            Move[] orderedMoves = OrderMoves(newGameMoves);
 
-            foreach (Move m in newGameMoves)
-            {
-                if (m.IsCapture) { 
-                    captureMoves.Add(m);
-                }
-                else if (m.IsPromotion) {
-                    promotionMoves.Add(m);
-                }
-                else otherMoves.Add(m);
-            }
-            
-
-            // Combine the lists, with capture moves first, then promotion moves, then others
-            Move[] orderedMoves = captureMoves.Concat(promotionMoves).Concat(otherMoves).ToArray();
-
-            int bestMove = isMaximisingPlayer ? -9999 : 9999;          
+            int bestEvaluation = isMaximisingPlayer ? -9999 : 9999;          
 
             foreach (Move orderedMove in orderedMoves)
             {   // Make the move and evaluate it
                 board.MakeMove(orderedMove);
                 int moveValue = MiniMax(depth - 1, orderedMove, alpha, beta, !isMaximisingPlayer);  
 
-                bestMove = isMaximisingPlayer 
-                ? Math.Max(bestMove, moveValue) 
-                : Math.Min(bestMove, moveValue);
+                bestEvaluation = isMaximisingPlayer 
+                ? Math.Max(bestEvaluation, moveValue) 
+                : Math.Min(bestEvaluation, moveValue);
 
                 board.UndoMove(orderedMove);
 
                 // Alpha Beta pruning
                 if (isMaximisingPlayer) 
-                    alpha = Math.Max(alpha, bestMove);
-                else beta = Math.Min(beta, bestMove);
+                    alpha = Math.Max(alpha, bestEvaluation);
+                else beta = Math.Min(beta, bestEvaluation);
 
                 if (beta <= alpha) 
-                    return bestMove;
+                    return bestEvaluation;
             }
-            return bestMove;
+
+            // Store the evaluation of the current position into the transposition table
+            tp.zobristHash = board.ZobristKey;
+            tp.evaluation = bestEvaluation;
+            tp.depth = (sbyte)depth;
+
+            if (bestEvaluation <= alpha)
+                tp.flag = 3; // UPPERBOUND
+            else if (bestEvaluation >= beta)
+                tp.flag = 2; // LOWERBOUND
+            else
+                tp.flag = 1; // EXACT
+
+
+            return bestEvaluation;
         }
         //--------------------------------------------------------------------------------
 
@@ -170,5 +216,28 @@ public class MyBot : IChessBot
             return totalEvaluation;
         }
         //--------------------------------------------------------------------------------
+
+
+        // Move ordering function
+        //--------------------------------------------------------------------------------
+        Move[] OrderMoves(Move[] moves)
+        {
+            List<Move> captureMoves = new List<Move>();
+            List<Move> promotionMoves = new List<Move>();
+            List<Move> otherMoves = new List<Move>();
+
+            foreach (Move m in moves)
+            {
+                if (m.IsCapture) { 
+                    captureMoves.Add(m);
+                }
+                else if (m.IsPromotion) {
+                    promotionMoves.Add(m);
+                }
+                else otherMoves.Add(m);
+            }
+        
+            return captureMoves.Concat(promotionMoves).Concat(otherMoves).ToArray();
+        }
     }
 }
