@@ -5,7 +5,7 @@ Welcome to the quartz-bot repository for Sebastian Lague's [Chess Bot Challenge]
 ### Search
 - [x] [Minimax](https://www.chessprogramming.org/Minimax) algorithm
 - [x] [Alpha-Beta Pruning](https://www.chessprogramming.org/Alpha-Beta) for optimisation of Minimax
-- [x] [Move Ordering](https://www.chessprogramming.org/Move_Ordering)
+- [x] Basic [Move Ordering](https://www.chessprogramming.org/Move_Ordering)
 - [ ] [Iterative Deepening](https://www.chessprogramming.org/Iterative_Deepening) 
 - [ ] [Transposition Tables](https://www.chessprogramming.org/Transposition_Table)
   - [ ] [Zobrist Hashing](https://www.chessprogramming.org/Zobrist_Hashing)
