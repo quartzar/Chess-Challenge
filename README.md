@@ -3,7 +3,8 @@
 Welcome to the quartz-bot repository for Sebastian Lague's [Chess Bot Challenge](https://github.com/SebLague/Chess-Challenge)! Currently, this bot has little in the way of token optimisation and is very much a work in progress (*though I can't beat it anymore!*).
 
 ### Search
-- [x] [Minimax](https://www.chessprogramming.org/Minimax) algorithm
+- [x] ~~[Minimax](https://www.chessprogramming.org/Minimax) algorithm~~
+- [x] [Negamax](https://www.chessprogramming.org/Negamax) algorithm
 - [x] [Alpha-Beta Pruning](https://www.chessprogramming.org/Alpha-Beta) for optimisation of Minimax
 - [x] Basic [Move Ordering](https://www.chessprogramming.org/Move_Ordering)
 - [ ] [Iterative Deepening](https://www.chessprogramming.org/Iterative_Deepening) 

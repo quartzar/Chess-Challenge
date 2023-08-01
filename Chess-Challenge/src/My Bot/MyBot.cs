@@ -34,14 +34,14 @@ public class MyBot : IChessBot
         m_TPTable = new Transposition[0x800000];
     }
 
-    Board m_board;
+    // Board m_board;
 
     //--------------------------------------------------------------------------------
 
     public Move Think(Board board, Timer timer)
     {
         Move[] newGameMoves = board.GetLegalMoves();
-        m_board = board;
+        // m_board = board;
         
         // Play a random move if nothing better is found
         Random rng = new();
@@ -52,13 +52,15 @@ public class MyBot : IChessBot
         int bestEvaluation = -9999;
 
         int monkeyCounter = 0; //#DEBUG
+        int ttCounter = 0; //#DEBUG
         int startTime = timer.MillisecondsElapsedThisTurn; //#DEBUG
+
 
         foreach (Move newGameMove in newGameMoves)
         {   // Make the move 
             board.MakeMove(newGameMove);
 
-            int moveValue = MiniMax(depth - 1, newGameMove, -10000, 10000, false);
+            int moveValue = -Negamax(depth - 1, newGameMove, -10000, 10000);
 
             board.UndoMove(newGameMove);
 
@@ -79,6 +81,7 @@ public class MyBot : IChessBot
         = monkeyCounter > 0 & moveTime > 0 ? (int)(monkeyCounter * 1000 / moveTime) : 0; //#DEBUG
         string formattedPositionsPerSecond = string.Format("{0:n0}", positionsPerSecond); //#DEBUG
         Console.WriteLine($"Positions/s => {formattedPositionsPerSecond}"); //#DEBUG
+        // Console.WriteLine($"TTable hits => {ttCounter}"); //#DEBUG
 
         return moveToPlay;
 
@@ -88,29 +91,10 @@ public class MyBot : IChessBot
 //------//--------------------------------------------------------------------------------
 
 
-        // MiniMax algorithm
+        // Negamax algorithm
         //--------------------------------------------------------------------------------
-        int MiniMax(int depth, Move move, int alpha, int beta, bool isMaximisingPlayer)
+        int Negamax(int depth, Move move, int alpha, int beta)
         {
-            // Transposition table lookup
-            ref Transposition tp = ref m_TPTable[m_board.ZobristKey & 0x7FFFFF];
-            if (tp.zobristHash == m_board.ZobristKey && tp.depth >= depth)
-            {
-                Console.WriteLine("TP hit");
-                switch (tp.flag)
-                {
-                    case 1: // EXACT
-                        return tp.evaluation;
-                    case 2: // LOWERBOUND
-                        alpha = Math.Max(alpha, tp.evaluation);
-                        break;
-                    case 3: // UPPERBOUND
-                        beta = Math.Min(beta, tp.evaluation);
-                        break;
-                }
-                if (alpha >= beta) 
-                    return tp.evaluation;
-            }
 
             Move[] newGameMoves = board.GetLegalMoves();
 
@@ -118,52 +102,65 @@ public class MyBot : IChessBot
             if (board.IsDraw()) return 0; // ~75+/-20 Elo increase over V4
             if (newGameMoves.Length == 0) // Checkmate
             {
-                return isMaximisingPlayer 
-                ? -99999 + board.PlyCount 
-                :  99999 - board.PlyCount;
+                return board.PlyCount -99999;
             }
+
+            // Transposition table lookup
+            // ref Transposition tp = ref m_TPTable[m_board.ZobristKey & 0x7FFFFF];
+            // if (tp.zobristHash == m_board.ZobristKey && tp.depth >= depth)
+            // {
+            //     ttCounter++; //#DEBUG
+            //     switch (tp.flag)
+            //     {
+            //         case 1: // EXACT
+            //             return tp.evaluation;
+            //         case 2: // LOWERBOUND
+            //             alpha = Math.Max(alpha, tp.evaluation);
+            //             break;
+            //         case 3: // UPPERBOUND
+            //             beta = Math.Min(beta, tp.evaluation);
+            //             break;
+            //     }
+            //     if (alpha >= beta) 
+            //         return tp.evaluation;
+            // }
 
             // If depth is 0, evaluate the board
             if (depth == 0) 
-                return isMaximisingPlayer ? EvaluateBoard() : -EvaluateBoard();
+                return EvaluateBoard();
 
 
             // Order the moves for efficiency TODO: Improve ordering, reduce token count
             Move[] orderedMoves = OrderMoves(newGameMoves);
 
-            int bestEvaluation = isMaximisingPlayer ? -9999 : 9999;          
+            int bestEvaluation = -9999;          
 
             foreach (Move orderedMove in orderedMoves)
-            {   // Make the move and evaluate it
+            {   
                 board.MakeMove(orderedMove);
-                int moveValue = MiniMax(depth - 1, orderedMove, alpha, beta, !isMaximisingPlayer);  
+                
+                int moveValue = -Negamax(depth - 1, orderedMove, -beta, -alpha);  
+                bestEvaluation = Math.Max(bestEvaluation, moveValue);
 
-                bestEvaluation = isMaximisingPlayer 
-                ? Math.Max(bestEvaluation, moveValue) 
-                : Math.Min(bestEvaluation, moveValue);
-
-                board.UndoMove(orderedMove);
+                board.UndoMove(orderedMove); 
 
                 // Alpha Beta pruning
-                if (isMaximisingPlayer) 
-                    alpha = Math.Max(alpha, bestEvaluation);
-                else beta = Math.Min(beta, bestEvaluation);
-
-                if (beta <= alpha) 
-                    return bestEvaluation;
+                alpha = Math.Max(alpha, bestEvaluation);
+                if (alpha >= beta) 
+                    break;
             }
 
             // Store the evaluation of the current position into the transposition table
-            tp.zobristHash = board.ZobristKey;
-            tp.evaluation = bestEvaluation;
-            tp.depth = (sbyte)depth;
+            // tp.zobristHash = m_board.ZobristKey;
+            // tp.evaluation = bestEvaluation;
+            // tp.depth = (sbyte)depth;
 
-            if (bestEvaluation <= alpha)
-                tp.flag = 3; // UPPERBOUND
-            else if (bestEvaluation >= beta)
-                tp.flag = 2; // LOWERBOUND
-            else
-                tp.flag = 1; // EXACT
+            // if (bestEvaluation <= alpha)
+            //     tp.flag = 3; // UPPERBOUND
+            // else if (bestEvaluation >= beta)
+            //     tp.flag = 2; // LOWERBOUND
+            // else
+            //     tp.flag = 1; // EXACT
 
 
             return bestEvaluation;
