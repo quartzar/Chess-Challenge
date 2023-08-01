@@ -51,13 +51,12 @@ public class MyBot : IChessBot
         string formattedPositionsPerSecond = string.Format("{0:n0}", positionsPerSecond); //#DEBUG
         Console.WriteLine($"Positions/s => {formattedPositionsPerSecond}"); //#DEBUG
 
-
         return moveToPlay;
 
 
-        //--------------------------------------------------------------------------------
-        // Functions
-        //--------------------------------------------------------------------------------
+//------//--------------------------------------------------------------------------------
+//------// Functions
+//------//--------------------------------------------------------------------------------
 
 
         // MiniMax algorithm
@@ -71,26 +70,47 @@ public class MyBot : IChessBot
             if (newGameMoves.Length == 0) // Checkmate
             {
                 return isMaximisingPlayer 
-                ? -99999 - board.PlyCount 
-                :  99999 + board.PlyCount;
+                ? -99999 + board.PlyCount 
+                :  99999 - board.PlyCount;
             }
-                
 
+            // If depth is 0, evaluate the board
             if (depth == 0) 
                 return isMaximisingPlayer ? EvaluateBoard() : -EvaluateBoard();
 
-            int bestMove = isMaximisingPlayer ? -9999 : 9999;
 
-            foreach (Move newGameMove in newGameMoves)
+            // Order the moves for efficiency TODO: Improve ordering, reduce token count
+            List<Move> captureMoves = new List<Move>();
+            List<Move> promotionMoves = new List<Move>();
+            List<Move> otherMoves = new List<Move>();
+
+            foreach (Move m in newGameMoves)
+            {
+                if (m.IsCapture) { 
+                    captureMoves.Add(m);
+                }
+                else if (m.IsPromotion) {
+                    promotionMoves.Add(m);
+                }
+                else otherMoves.Add(m);
+            }
+            
+
+            // Combine the lists, with capture moves first, then promotion moves, then others
+            Move[] orderedMoves = captureMoves.Concat(promotionMoves).Concat(otherMoves).ToArray();
+
+            int bestMove = isMaximisingPlayer ? -9999 : 9999;          
+
+            foreach (Move orderedMove in orderedMoves)
             {   // Make the move and evaluate it
-                board.MakeMove(newGameMove);
-                int moveValue = MiniMax(depth - 1, newGameMove, alpha, beta, !isMaximisingPlayer);  
+                board.MakeMove(orderedMove);
+                int moveValue = MiniMax(depth - 1, orderedMove, alpha, beta, !isMaximisingPlayer);  
 
                 bestMove = isMaximisingPlayer 
                 ? Math.Max(bestMove, moveValue) 
                 : Math.Min(bestMove, moveValue);
 
-                board.UndoMove(newGameMove);
+                board.UndoMove(orderedMove);
 
                 // Alpha Beta pruning
                 if (isMaximisingPlayer) 
@@ -128,11 +148,6 @@ public class MyBot : IChessBot
                     // Get the absolute piece value
                     int pieceValue = pieceValues[(int)piece.PieceType];
 
-                    // Add high weighting to checkmate
-                    // if (board.IsInCheckmate()) {
-                    //     pieceValue *= 10;
-                    // }
-
                     // If piece is opponent, make it negative
                     if (piece.IsWhite != board.IsWhiteToMove) {
                         pieceValue = -pieceValue;
@@ -141,9 +156,6 @@ public class MyBot : IChessBot
                     totalEvaluation += pieceValue;
                 }
             }
-
-            // Penalty for causing a draw --> Unknown if this is beneficial or not
-            // totalEvaluation -= board.IsDraw() ? 10 : 0;
 
             // Calculate mobility --> ELO diff increase of 100-130
             int myMobility = board.GetLegalMoves().Length;
