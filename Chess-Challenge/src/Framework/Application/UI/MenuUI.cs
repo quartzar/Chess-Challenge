@@ -81,11 +81,14 @@ namespace ChessChallenge.Application
             buttonPos = UIHelper.Scale(new Vector2(405, 210)); 
             buttonSize = UIHelper.Scale(new Vector2(200, 55)); 
             
-            if (NextButtonInRow("MyBot vs V4", ref buttonPos, spacing, buttonSize)) { 
+            if (NextButtonInRow("Versus V4", ref buttonPos, spacing, buttonSize)) { 
                 controller.StartNewBotMatch(ChallengeController.PlayerType.MyBot, ChallengeController.PlayerType.V4); 
             }
-            if (NextButtonInRow("MyBot vs V5", ref buttonPos, spacing, buttonSize)) { 
+            if (NextButtonInRow("Versus V5", ref buttonPos, spacing, buttonSize)) { 
                 controller.StartNewBotMatch(ChallengeController.PlayerType.MyBot, ChallengeController.PlayerType.V5); 
+            }
+            if (NextButtonInRow("Versus Selebot", ref buttonPos, spacing, buttonSize)) { 
+                controller.StartNewBotMatch(ChallengeController.PlayerType.MyBot, ChallengeController.PlayerType.Selebot); 
             }
 
         }
