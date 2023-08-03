@@ -15,24 +15,24 @@ public class MyBot_V5_1 : IChessBot
     // private const byte INVALID = 0, EXACT = 1, LOWERBOUND = 2, UPPERBOUND = 3;
 
     // 14 bytes per entry, likely will align to 16 bytes due to padding (if it aligns to 32, recalculate max TP table size)
-    struct Transposition
-    {
-        public ulong zobristHash;
-        public Move move;
-        public int evaluation;
-        public sbyte depth;
-        public byte flag;
-    }; 
+    // struct Transposition
+    // {
+    //     public ulong zobristHash;
+    //     public Move move;
+    //     public int evaluation;
+    //     public sbyte depth;
+    //     public byte flag;
+    // }; 
 
-    Transposition[] m_TPTable;
+    // Transposition[] m_TPTable;
     // ulong k_TpMask = 0x7FFFFF; //4.7 million entries, likely consuming about 151 MB of memory
     //To access => ref Transposition transposition = ref m_TPTable[board.ZobristKey & k_TpMask];
     //you also need to check to make sure that the stored hash is equal to the board state you're interested in, alongside your normal checks w.r.t. depth etc.
 
-    public MyBot_V5_1()
-    {
-        m_TPTable = new Transposition[0x800000];
-    }
+    // public MyBot_V5_1()
+    // {
+    //     m_TPTable = new Transposition[0x800000];
+    // }
 
     // Board m_board;
 
@@ -53,7 +53,7 @@ public class MyBot_V5_1 : IChessBot
         int bestEvaluation = -9999;
 
         int monkeyCounter = 0; //#DEBUG
-        int ttCounter = 0; //#DEBUG
+        // int ttCounter = 0; //#DEBUG
         int startTime = timer.MillisecondsElapsedThisTurn; //#DEBUG
 
         // int maxTime = timer.MillisecondsRemaining/30;
@@ -250,11 +250,11 @@ public class MyBot_V5_1 : IChessBot
 
         // Depth timer
         //--------------------------------------------------------------------------------
-        bool ShouldExecuteNextDepth(Timer timer, int maxThinkTime)
-        {
-            int currentThinkTime = timer.MillisecondsElapsedThisTurn;
-            return ((maxThinkTime - currentThinkTime) > currentThinkTime * 2);
-        }
+        // bool ShouldExecuteNextDepth(Timer timer, int maxThinkTime)
+        // {
+        //     int currentThinkTime = timer.MillisecondsElapsedThisTurn;
+        //     return ((maxThinkTime - currentThinkTime) > currentThinkTime * 2);
+        // }
         //--------------------------------------------------------------------------------
     }
 }
