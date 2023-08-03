@@ -23,6 +23,8 @@ namespace ChessChallenge.Application
             V4,
             V5,
             V6,
+            NegamaxB,
+            NegamaxA,
             Selebot
         }
 
@@ -217,6 +219,8 @@ namespace ChessChallenge.Application
                 PlayerType.V4 => new ChessPlayer(new MyBot_V4(), type, GameDurationMilliseconds),
                 PlayerType.V5 => new ChessPlayer(new MyBot_V5(), type, GameDurationMilliseconds),
                 PlayerType.V6 => new ChessPlayer(new MyBot_V6(), type, GameDurationMilliseconds),
+                PlayerType.NegamaxB => new ChessPlayer(new NegamaxBasic(), type, GameDurationMilliseconds),
+                PlayerType.NegamaxA => new ChessPlayer(new NegamaxAdvanced(), type, GameDurationMilliseconds),
                 PlayerType.Selebot => new ChessPlayer(new Selebot(), type, GameDurationMilliseconds),
                 _ => new ChessPlayer(new HumanPlayer(boardUI), type)
             };
