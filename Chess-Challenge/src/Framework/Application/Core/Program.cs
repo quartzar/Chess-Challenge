@@ -25,7 +25,7 @@ namespace ChessChallenge.Application
             }
 
             Raylib.InitWindow(screenWidth, screenHeight, "Chess Coding Challenge");
-            Raylib.SetTargetFPS(60);
+            Raylib.SetTargetFPS(144);
 
             UpdateCamera(screenWidth, screenHeight);
 
