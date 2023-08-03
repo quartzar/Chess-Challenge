@@ -91,11 +91,12 @@ public class MyBot : IChessBot
     //--------------------------------------------------------------------------------
 
 
-    // Negamax algorithm
+    // Negamax algorithm // https://www.chessprogramming.org/Negama 
+    //                   // https://www.chessprogramming.org/Quiescence_Search
     //--------------------------------------------------------------------------------
     int Negamax(int depth, int alpha, int beta)
     {
-        bool pvNode = alpha + 1 < beta;
+        // bool pvNode = alpha + 1 < beta;
         bool inQSearch = depth <= 0;
         int startingAlpha = alpha;
         int bestEvaluation = -2147483647;              
