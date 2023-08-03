@@ -87,6 +87,9 @@ namespace ChessChallenge.Application
             if (NextButtonInRow("Versus V5", ref buttonPos, spacing, buttonSize)) { 
                 controller.StartNewBotMatch(ChallengeController.PlayerType.MyBot, ChallengeController.PlayerType.V5); 
             }
+            if (NextButtonInRow("Versus V6", ref buttonPos, spacing, buttonSize)) { 
+                controller.StartNewBotMatch(ChallengeController.PlayerType.MyBot, ChallengeController.PlayerType.V6); 
+            }
             if (NextButtonInRow("Versus Selebot", ref buttonPos, spacing, buttonSize)) { 
                 controller.StartNewBotMatch(ChallengeController.PlayerType.MyBot, ChallengeController.PlayerType.Selebot); 
             }

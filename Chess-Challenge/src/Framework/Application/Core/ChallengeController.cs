@@ -22,6 +22,7 @@ namespace ChessChallenge.Application
             EvilBot,
             V4,
             V5,
+            V6,
             Selebot
         }
 
@@ -215,6 +216,7 @@ namespace ChessChallenge.Application
                 PlayerType.EvilBot => new ChessPlayer(new EvilBot(), type, GameDurationMilliseconds),
                 PlayerType.V4 => new ChessPlayer(new MyBot_V4(), type, GameDurationMilliseconds),
                 PlayerType.V5 => new ChessPlayer(new MyBot_V5(), type, GameDurationMilliseconds),
+                PlayerType.V6 => new ChessPlayer(new MyBot_V6(), type, GameDurationMilliseconds),
                 PlayerType.Selebot => new ChessPlayer(new Selebot(), type, GameDurationMilliseconds),
                 _ => new ChessPlayer(new HumanPlayer(boardUI), type)
             };
